@@ -12777,6 +12777,7 @@ public struct RawKeyPathComponentSyntax: RawSyntaxNodeProtocol {
     case `property`(RawKeyPathPropertyComponentSyntax)
     case `subscript`(RawKeyPathSubscriptComponentSyntax)
     case `optional`(RawKeyPathOptionalComponentSyntax)
+    case function(RawKeyPathFunctionComponentSyntax)
     
     public static func isKindOf(_ raw: RawSyntax) -> Bool {
       return RawKeyPathPropertyComponentSyntax.isKindOf(raw) || RawKeyPathSubscriptComponentSyntax.isKindOf(raw) || RawKeyPathOptionalComponentSyntax.isKindOf(raw)
@@ -12785,6 +12786,8 @@ public struct RawKeyPathComponentSyntax: RawSyntaxNodeProtocol {
     public var raw: RawSyntax {
       switch self {
       case .property(let node):
+        return node.raw
+      case .function(let node):
         return node.raw
       case .subscript(let node):
         return node.raw
@@ -13098,6 +13101,53 @@ public struct RawKeyPathPropertyComponentSyntax: RawSyntaxNodeProtocol {
   public var unexpectedAfterGenericArgumentClause: RawUnexpectedNodesSyntax? {
     layoutView.children[6].map(RawUnexpectedNodesSyntax.init(raw:))
   }
+}
+
+@_spi(RawSyntax)
+public struct RawKeyPathFunctionComponentSyntax: RawSyntaxNodeProtocol {
+    
+    public init(
+        identifier: RawTokenSyntax,
+        argumentList: RawTupleExprSyntax,
+        arena: __shared SyntaxArena
+    ) {
+        self.raw = RawSyntax.makeLayout(
+            kind: .keyPathFunctionComponent,
+            uninitializedCount: 2,
+            arena: arena) { layout in
+                layout.initialize(repeating: nil)
+                layout[0] = identifier.raw
+                layout[1] = argumentList.raw
+            }
+    }
+    
+    @_spi(RawSyntax)
+    public var layoutView: RawSyntaxLayoutView {
+        return raw.layoutView!
+    }
+    
+    public static func isKindOf(_ raw: RawSyntax) -> Bool {
+        return raw.kind == .keyPathFunctionComponent
+    }
+    
+    public var raw: RawSyntax
+    
+    init(raw: RawSyntax) {
+        precondition(Self.isKindOf(raw))
+        self.raw = raw
+    }
+    
+    private init(unchecked raw: RawSyntax) {
+        self.raw = raw
+    }
+    
+    public init?(_ other: some RawSyntaxNodeProtocol) {
+        guard Self.isKindOf(other.raw) else {
+            return nil
+        }
+        self.init(unchecked: other.raw)
+    }
+    
 }
 
 @_spi(RawSyntax)

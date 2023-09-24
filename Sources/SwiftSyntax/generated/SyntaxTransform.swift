@@ -808,6 +808,11 @@ public protocol SyntaxTransformVisitor {
   ///   - Parameter node: the node we are visiting.
   ///   - Returns: the sum of whatever the child visitors return.
   func visit(_ node: KeyPathSubscriptComponentSyntax) -> ResultType
+    
+    /// Visiting ``KeyPathFunctionComponentSyntax`` specifically.
+    ///   - Parameter node: the node we are visiting.
+    ///   - Returns: the sum of whatever the child visitors return.
+    func visit(_ node: KeyPathFunctionComponentSyntax) -> ResultType
   
   /// Visiting ``LabeledSpecializeEntrySyntax`` specifically.
   ///   - Parameter node: the node we are visiting.
@@ -2515,6 +2520,13 @@ extension SyntaxTransformVisitor {
   public func visit(_ node: KeyPathSubscriptComponentSyntax) -> ResultType {
     visitAny(Syntax(node))
   }
+    
+    /// Visiting ``KeyPathFunctionComponentSyntax`` specifically.
+    ///   - Parameter node: the node we are visiting.
+    ///   - Returns: nil by default.
+    public func visit(_ node: KeyPathFunctionComponentSyntax) -> ResultType {
+      visitAny(Syntax(node))
+    }
   
   /// Visiting ``LabeledSpecializeEntrySyntax`` specifically.
   ///   - Parameter node: the node we are visiting.
@@ -3668,6 +3680,8 @@ extension SyntaxTransformVisitor {
     case .keyPathPropertyComponent(let derived):
       return visit(derived)
     case .keyPathSubscriptComponent(let derived):
+      return visit(derived)
+    case .keyPathFunctionComponent(let derived):
       return visit(derived)
     case .labeledSpecializeEntry(let derived):
       return visit(derived)

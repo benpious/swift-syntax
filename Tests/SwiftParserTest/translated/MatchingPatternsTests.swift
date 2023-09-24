@@ -517,5 +517,14 @@ final class MatchingPatternsTests: XCTestCase {
       ]
     )
   }
+    
+    func testMatchingPatterns37() {
+        assertParse(
+            #"""
+            let kp = \MyType.test(arg: abc)
+            """#
+        )
+    }
+
 
 }

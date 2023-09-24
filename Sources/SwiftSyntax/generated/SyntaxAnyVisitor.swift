@@ -1312,6 +1312,10 @@ open class SyntaxAnyVisitor: SyntaxVisitor {
   override open func visit(_ node: KeyPathSubscriptComponentSyntax) -> SyntaxVisitorContinueKind {
     return visitAny(node._syntaxNode)
   }
+    
+    override open func visit(_ node: KeyPathFunctionComponentSyntax) -> SyntaxVisitorContinueKind {
+      return visitAny(node._syntaxNode)
+    }
   
   override open func visitPost(_ node: KeyPathSubscriptComponentSyntax) {
     visitAnyPost(node._syntaxNode)

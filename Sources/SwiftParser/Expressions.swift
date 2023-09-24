@@ -662,7 +662,7 @@ extension Parser {
       name = selfKeyword
       declNameArgs = nil
     } else {
-      // Handle an arbitrary declararion name.
+      // Handle an arbitrary declaration name.
       (name, declNameArgs) = self.parseDeclNameRef([.keywords, .compoundNames])
     }
 
@@ -1112,24 +1112,44 @@ extension Parser {
 
       // Check for a .name or .1 suffix.
       if self.at(.period) {
-        let (unexpectedPeriod, period, name, declNameArgs, generics) = parseDottedExpressionSuffix(
-          previousNode: components.last?.raw ?? rootType?.raw ?? backslash.raw
-        )
-        components.append(
-          RawKeyPathComponentSyntax(
-            unexpectedPeriod,
-            period: period,
-            component: .property(
-              RawKeyPathPropertyComponentSyntax(
-                identifier: name,
-                declNameArguments: declNameArgs,
-                genericArgumentClause: generics,
-                arena: self.arena
-              )
-            ),
-            arena: self.arena
+          let start = components.last?.raw ?? rootType?.raw ?? backslash.raw
+          let (unexpectedPeriod, period, name, declNameArgs, generics) = parseDottedExpressionSuffix(
+            previousNode: start
           )
-        )
+            if let functionCall = parseKeyPathFunctionExpression(
+                pattern: pattern
+            ) {
+                components.append(
+                  RawKeyPathComponentSyntax(
+                      nil,
+                      period: period,
+                      component: .function(
+                          RawKeyPathFunctionComponentSyntax(
+                            identifier: name,
+                            argumentList: functionCall,
+                            arena: arena
+                          )
+                      ),
+                      arena: self.arena
+                  )
+                )
+            } else {
+                components.append(
+                    RawKeyPathComponentSyntax(
+                        unexpectedPeriod,
+                        period: period,
+                        component: .property(
+                            RawKeyPathPropertyComponentSyntax(
+                                identifier: name,
+                                declNameArguments: declNameArgs,
+                                genericArgumentClause: generics,
+                                arena: self.arena
+                            )
+                        ),
+                        arena: self.arena
+                    )
+                )
+            }
         continue
       }
 
@@ -1148,6 +1168,29 @@ extension Parser {
       arena: self.arena
     )
   }
+    
+    mutating
+    func parseKeyPathFunctionExpression(
+        pattern: PatternContext
+    ) -> RawTupleExprSyntax? {
+        // If there is an expr-call-suffix, parse it and form a call.
+        if let lparen = self.consume(if: TokenSpec(.leftParen, allowAtStartOfLine: false)) {
+            let args = self.parseArgumentListElements(pattern: pattern)
+            let (_, rightParen) = self.expect(.rightParen)
+            return RawTupleExprSyntax(
+                leftParen: lparen,
+                elements: RawTupleExprElementListSyntax(
+                    elements: args,
+                    arena: self.arena
+                ),
+                rightParen: rightParen,
+                arena: arena
+            )
+        } else {
+            return nil
+        }
+    }
+    
 }
 
 extension Parser {

@@ -173,6 +173,7 @@ public enum SyntaxKind {
   case keyPathOptionalComponent
   case keyPathPropertyComponent
   case keyPathSubscriptComponent
+  case keyPathFunctionComponent
   case labeledSpecializeEntry
   case labeledStmt
   case layoutRequirement
@@ -734,7 +735,9 @@ public enum SyntaxKind {
     case .keyPathPropertyComponent:
       return KeyPathPropertyComponentSyntax.self
     case .keyPathSubscriptComponent:
-      return KeyPathSubscriptComponentSyntax.self
+      return KeyPathFunctionComponentSyntax.self
+    case .keyPathFunctionComponent:
+      return KeyPathFunctionComponentSyntax.self
     case .labeledSpecializeEntry:
       return LabeledSpecializeEntrySyntax.self
     case .labeledStmt:

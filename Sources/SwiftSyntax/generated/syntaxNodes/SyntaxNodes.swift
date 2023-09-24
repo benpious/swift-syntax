@@ -11480,6 +11480,45 @@ public struct KeyPathPropertyComponentSyntax: SyntaxProtocol, SyntaxHashable {
   }
 }
 
+// MARK: - KeyPathFunctionComponentSyntax
+
+
+public struct KeyPathFunctionComponentSyntax: SyntaxProtocol, SyntaxHashable, SyntaxChildChoices {
+    
+    public static var structure: SyntaxNodeStructure {
+        return .layout([
+            \Self.name,
+             \Self.arguments,
+        ])
+    }
+    
+    var name: TokenSyntax {
+        TokenSyntax(data.child(at: 0, parent: Syntax(self))!)
+    }
+    
+    var arguments: TupleExprSyntax {
+        TupleExprSyntax(data.child(at: 0, parent: Syntax(self))!)
+    }
+    
+    public let _syntaxNode: Syntax
+    
+    public init?(_ node: some SyntaxProtocol) {
+        guard node.raw.kind == .keyPathFunctionComponent else {
+            return nil
+        }
+        self._syntaxNode = node._syntaxNode
+    }
+    
+    /// Creates a ``KeyPathFunctionComponentSyntax`` node from the given ``SyntaxData``. This assumes
+    /// that the `SyntaxData` is of the correct kind. If it is not, the behaviour
+    /// is undefined.
+    internal init(_ data: SyntaxData) {
+        precondition(data.raw.kind == .keyPathFunctionComponent)
+      self._syntaxNode = Syntax(data)
+    }
+
+}
+
 // MARK: - KeyPathSubscriptComponentSyntax
 
 

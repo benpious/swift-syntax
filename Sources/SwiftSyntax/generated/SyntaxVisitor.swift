@@ -1924,6 +1924,13 @@ open class SyntaxVisitor {
   open func visit(_ node: KeyPathSubscriptComponentSyntax) -> SyntaxVisitorContinueKind {
     return .visitChildren
   }
+    
+    /// Visiting ``KeyPathFunctionComponentSyntax`` specifically.
+    ///   - Parameter node: the node we are visiting.
+    ///   - Returns: how should we continue visiting.
+    open func visit(_ node: KeyPathFunctionComponentSyntax) -> SyntaxVisitorContinueKind {
+      return .visitChildren
+    }
   
   /// The function called after visiting ``KeyPathSubscriptComponentSyntax`` and its descendents.
   ///   - node: the node we just finished visiting.
@@ -5096,6 +5103,17 @@ open class SyntaxVisitor {
     }
     visitPost(node)
   }
+    
+    /// Implementation detail of doVisit(_:_:). Do not call directly.
+    private func visitImplKeyPathFunctionComponentSyntax(_ data: SyntaxData) {
+      let node = KeyPathSubscriptComponentSyntax(data)
+      let needsChildren = (visit(node) == .visitChildren)
+      // Avoid calling into visitChildren if possible.
+      if needsChildren && !node.raw.layoutView!.children.isEmpty {
+        visitChildren(node)
+      }
+      visitPost(node)
+    }
   
   /// Implementation detail of doVisit(_:_:). Do not call directly.
   private func visitImplKeyPathSubscriptComponentSyntax(_ data: SyntaxData) {
@@ -6740,6 +6758,8 @@ open class SyntaxVisitor {
       visitImplKeyPathPropertyComponentSyntax(data)
     case .keyPathSubscriptComponent:
       visitImplKeyPathSubscriptComponentSyntax(data)
+    case .keyPathFunctionComponent:
+      visitImplKeyPathFunctionComponentSyntax(data)
     case .labeledSpecializeEntry:
       visitImplLabeledSpecializeEntrySyntax(data)
     case .labeledStmt:
