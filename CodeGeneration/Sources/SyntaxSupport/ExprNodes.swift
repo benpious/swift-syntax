@@ -1015,6 +1015,10 @@ public let EXPR_NODES: [Node] = [
         name: "Component",
         kind: .nodeChoices(choices: [
           Child(
+            name: "Function",
+            kind: .node(kind: .keyPathFunctionComponent)
+          ),
+          Child(
             name: "Property",
             kind: .node(kind: .keyPathPropertyComponent)
           ),
@@ -1053,6 +1057,29 @@ public let EXPR_NODES: [Node] = [
       ),
     ]
   ),
+  
+  // A key path component like .foo(bar: 1)
+  Node(
+    kind: .keyPathFunctionComponent,
+    base: .syntax,
+    nameForDiagnostics: "key path function component",
+    children: [
+      Child(
+        name: "LeftParen",
+        kind: .token(choices: [.token(tokenKind: "LeftParenToken")])
+      ),
+      Child(
+        name: "ArgumentList",
+        kind: .collection(kind: .tupleExprElementList, collectionElementName: "Argument"),
+        nameForDiagnostics: "arguments"
+      ),
+      Child(
+        name: "RightParen",
+        kind: .token(choices: [.token(tokenKind: "RightParenToken")])
+      ),
+    ]
+  ),
+
 
   // A key path component like '?' or '!'.
   Node(

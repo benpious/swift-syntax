@@ -339,6 +339,7 @@ These articles are intended for developers wishing to contribute to SwiftSyntax
 - <doc:SwiftSyntax/ImplementsAttributeArgumentsSyntax>
 - <doc:SwiftSyntax/InitializerClauseSyntax>
 - <doc:SwiftSyntax/InitializesEffectSyntax>
+- <doc:SwiftSyntax/KeyPathFunctionComponentSyntax>
 - <doc:SwiftSyntax/KeyPathOptionalComponentSyntax>
 - <doc:SwiftSyntax/KeyPathPropertyComponentSyntax>
 - <doc:SwiftSyntax/KeyPathSubscriptComponentSyntax>

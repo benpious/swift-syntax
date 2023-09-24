@@ -11096,12 +11096,15 @@ public struct InitializesEffectSyntax: SyntaxProtocol, SyntaxHashable {
 
 public struct KeyPathComponentSyntax: SyntaxProtocol, SyntaxHashable {
   public enum Component: SyntaxChildChoices {
+    case `function`(KeyPathFunctionComponentSyntax)
     case `property`(KeyPathPropertyComponentSyntax)
     case `subscript`(KeyPathSubscriptComponentSyntax)
     case `optional`(KeyPathOptionalComponentSyntax)
     
     public var _syntaxNode: Syntax {
       switch self {
+      case .function(let node):
+        return node._syntaxNode
       case .property(let node):
         return node._syntaxNode
       case .subscript(let node):
@@ -11113,6 +11116,10 @@ public struct KeyPathComponentSyntax: SyntaxProtocol, SyntaxHashable {
     
     init(_ data: SyntaxData) {
       self.init(Syntax(data))!
+    }
+    
+    public init(_ node: KeyPathFunctionComponentSyntax) {
+      self = .function(node)
     }
     
     public init(_ node: KeyPathPropertyComponentSyntax) {
@@ -11128,6 +11135,10 @@ public struct KeyPathComponentSyntax: SyntaxProtocol, SyntaxHashable {
     }
     
     public init?(_ node: some SyntaxProtocol) {
+      if let node = node.as(KeyPathFunctionComponentSyntax.self) {
+        self = .function(node)
+        return
+      }
       if let node = node.as(KeyPathPropertyComponentSyntax.self) {
         self = .property(node)
         return
@@ -11144,7 +11155,12 @@ public struct KeyPathComponentSyntax: SyntaxProtocol, SyntaxHashable {
     }
     
     public static var structure: SyntaxNodeStructure {
-      return .choices([.node(KeyPathPropertyComponentSyntax.self), .node(KeyPathSubscriptComponentSyntax.self), .node(KeyPathOptionalComponentSyntax.self)])
+      return .choices([
+            .node(KeyPathFunctionComponentSyntax.self), 
+            .node(KeyPathPropertyComponentSyntax.self), 
+            .node(KeyPathSubscriptComponentSyntax.self), 
+            .node(KeyPathOptionalComponentSyntax.self)
+          ])
     }
   }
   
@@ -11256,6 +11272,167 @@ public struct KeyPathComponentSyntax: SyntaxProtocol, SyntaxHashable {
           \Self.unexpectedBetweenPeriodAndComponent, 
           \Self.component, 
           \Self.unexpectedAfterComponent
+        ])
+  }
+}
+
+// MARK: - KeyPathFunctionComponentSyntax
+
+
+public struct KeyPathFunctionComponentSyntax: SyntaxProtocol, SyntaxHashable {
+  public let _syntaxNode: Syntax
+  
+  public init?(_ node: some SyntaxProtocol) {
+    guard node.raw.kind == .keyPathFunctionComponent else {
+      return nil
+    }
+    self._syntaxNode = node._syntaxNode
+  }
+  
+  /// Creates a ``KeyPathFunctionComponentSyntax`` node from the given ``SyntaxData``. This assumes
+  /// that the `SyntaxData` is of the correct kind. If it is not, the behaviour
+  /// is undefined.
+  internal init(_ data: SyntaxData) {
+    precondition(data.raw.kind == .keyPathFunctionComponent)
+    self._syntaxNode = Syntax(data)
+  }
+  
+  public init(
+      leadingTrivia: Trivia? = nil,
+      _ unexpectedBeforeLeftParen: UnexpectedNodesSyntax? = nil,
+      leftParen: TokenSyntax = .leftParenToken(),
+      _ unexpectedBetweenLeftParenAndArgumentList: UnexpectedNodesSyntax? = nil,
+      argumentList: TupleExprElementListSyntax,
+      _ unexpectedBetweenArgumentListAndRightParen: UnexpectedNodesSyntax? = nil,
+      rightParen: TokenSyntax = .rightParenToken(),
+      _ unexpectedAfterRightParen: UnexpectedNodesSyntax? = nil,
+      trailingTrivia: Trivia? = nil
+    
+  ) {
+    // Extend the lifetime of all parameters so their arenas don't get destroyed
+    // before they can be added as children of the new arena.
+    let data: SyntaxData = withExtendedLifetime((SyntaxArena(), (
+            unexpectedBeforeLeftParen, 
+            leftParen, 
+            unexpectedBetweenLeftParenAndArgumentList, 
+            argumentList, 
+            unexpectedBetweenArgumentListAndRightParen, 
+            rightParen, 
+            unexpectedAfterRightParen
+          ))) {(arena, _) in
+      let layout: [RawSyntax?] = [
+          unexpectedBeforeLeftParen?.raw, 
+          leftParen.raw, 
+          unexpectedBetweenLeftParenAndArgumentList?.raw, 
+          argumentList.raw, 
+          unexpectedBetweenArgumentListAndRightParen?.raw, 
+          rightParen.raw, 
+          unexpectedAfterRightParen?.raw
+        ]
+      let raw = RawSyntax.makeLayout(
+        kind: SyntaxKind.keyPathFunctionComponent,
+        from: layout,
+        arena: arena,
+        leadingTrivia: leadingTrivia,
+        trailingTrivia: trailingTrivia
+        
+      )
+      return SyntaxData.forRoot(raw)
+    }
+    self.init(data)
+  }
+  
+  public var unexpectedBeforeLeftParen: UnexpectedNodesSyntax? {
+    get {
+      return data.child(at: 0, parent: Syntax(self)).map(UnexpectedNodesSyntax.init)
+    }
+    set(value) {
+      self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 0, with: value?.raw, arena: SyntaxArena()))
+    }
+  }
+  
+  public var leftParen: TokenSyntax {
+    get {
+      return TokenSyntax(data.child(at: 1, parent: Syntax(self))!)
+    }
+    set(value) {
+      self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 1, with: value.raw, arena: SyntaxArena()))
+    }
+  }
+  
+  public var unexpectedBetweenLeftParenAndArgumentList: UnexpectedNodesSyntax? {
+    get {
+      return data.child(at: 2, parent: Syntax(self)).map(UnexpectedNodesSyntax.init)
+    }
+    set(value) {
+      self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 2, with: value?.raw, arena: SyntaxArena()))
+    }
+  }
+  
+  public var argumentList: TupleExprElementListSyntax {
+    get {
+      return TupleExprElementListSyntax(data.child(at: 3, parent: Syntax(self))!)
+    }
+    set(value) {
+      self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 3, with: value.raw, arena: SyntaxArena()))
+    }
+  }
+  
+  /// Adds the provided `element` to the node's `argumentList`
+  /// collection.
+  /// - param element: The new `Argument` to add to the node's
+  ///                  `argumentList` collection.
+  /// - returns: A copy of the receiver with the provided `Argument`
+  ///            appended to its `argumentList` collection.
+  public func addArgument(_ element: TupleExprElementSyntax) -> KeyPathFunctionComponentSyntax {
+    var collection: RawSyntax
+    let arena = SyntaxArena()
+    if let col = raw.layoutView!.children[3] {
+      collection = col.layoutView!.appending(element.raw, arena: arena)
+    } else {
+      collection = RawSyntax.makeLayout(kind: SyntaxKind.tupleExprElementList,
+                                        from: [element.raw], arena: arena)
+    }
+    let newData = data.replacingChild(at: 3, with: collection, arena: arena)
+    return KeyPathFunctionComponentSyntax(newData)
+  }
+  
+  public var unexpectedBetweenArgumentListAndRightParen: UnexpectedNodesSyntax? {
+    get {
+      return data.child(at: 4, parent: Syntax(self)).map(UnexpectedNodesSyntax.init)
+    }
+    set(value) {
+      self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 4, with: value?.raw, arena: SyntaxArena()))
+    }
+  }
+  
+  public var rightParen: TokenSyntax {
+    get {
+      return TokenSyntax(data.child(at: 5, parent: Syntax(self))!)
+    }
+    set(value) {
+      self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 5, with: value.raw, arena: SyntaxArena()))
+    }
+  }
+  
+  public var unexpectedAfterRightParen: UnexpectedNodesSyntax? {
+    get {
+      return data.child(at: 6, parent: Syntax(self)).map(UnexpectedNodesSyntax.init)
+    }
+    set(value) {
+      self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 6, with: value?.raw, arena: SyntaxArena()))
+    }
+  }
+  
+  public static var structure: SyntaxNodeStructure {
+    return .layout([
+          \Self.unexpectedBeforeLeftParen, 
+          \Self.leftParen, 
+          \Self.unexpectedBetweenLeftParenAndArgumentList, 
+          \Self.argumentList, 
+          \Self.unexpectedBetweenArgumentListAndRightParen, 
+          \Self.rightParen, 
+          \Self.unexpectedAfterRightParen
         ])
   }
 }
@@ -11478,45 +11655,6 @@ public struct KeyPathPropertyComponentSyntax: SyntaxProtocol, SyntaxHashable {
           \Self.unexpectedAfterGenericArgumentClause
         ])
   }
-}
-
-// MARK: - KeyPathFunctionComponentSyntax
-
-
-public struct KeyPathFunctionComponentSyntax: SyntaxProtocol, SyntaxHashable, SyntaxChildChoices {
-    
-    public static var structure: SyntaxNodeStructure {
-        return .layout([
-            \Self.name,
-             \Self.arguments,
-        ])
-    }
-    
-    var name: TokenSyntax {
-        TokenSyntax(data.child(at: 0, parent: Syntax(self))!)
-    }
-    
-    var arguments: TupleExprSyntax {
-        TupleExprSyntax(data.child(at: 0, parent: Syntax(self))!)
-    }
-    
-    public let _syntaxNode: Syntax
-    
-    public init?(_ node: some SyntaxProtocol) {
-        guard node.raw.kind == .keyPathFunctionComponent else {
-            return nil
-        }
-        self._syntaxNode = node._syntaxNode
-    }
-    
-    /// Creates a ``KeyPathFunctionComponentSyntax`` node from the given ``SyntaxData``. This assumes
-    /// that the `SyntaxData` is of the correct kind. If it is not, the behaviour
-    /// is undefined.
-    internal init(_ data: SyntaxData) {
-        precondition(data.raw.kind == .keyPathFunctionComponent)
-      self._syntaxNode = Syntax(data)
-    }
-
 }
 
 // MARK: - KeyPathSubscriptComponentSyntax

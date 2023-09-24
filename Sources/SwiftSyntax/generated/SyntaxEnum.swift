@@ -170,10 +170,10 @@ public enum SyntaxEnum {
   case keyPathComponentList(KeyPathComponentListSyntax)
   case keyPathComponent(KeyPathComponentSyntax)
   case keyPathExpr(KeyPathExprSyntax)
+  case keyPathFunctionComponent(KeyPathFunctionComponentSyntax)
   case keyPathOptionalComponent(KeyPathOptionalComponentSyntax)
   case keyPathPropertyComponent(KeyPathPropertyComponentSyntax)
   case keyPathSubscriptComponent(KeyPathSubscriptComponentSyntax)
-  case keyPathFunctionComponent(KeyPathFunctionComponentSyntax)
   case labeledSpecializeEntry(LabeledSpecializeEntrySyntax)
   case labeledStmt(LabeledStmtSyntax)
   case layoutRequirement(LayoutRequirementSyntax)
@@ -611,14 +611,14 @@ public extension Syntax {
       return .keyPathComponent(KeyPathComponentSyntax(self)!)
     case .keyPathExpr:
       return .keyPathExpr(KeyPathExprSyntax(self)!)
+    case .keyPathFunctionComponent:
+      return .keyPathFunctionComponent(KeyPathFunctionComponentSyntax(self)!)
     case .keyPathOptionalComponent:
       return .keyPathOptionalComponent(KeyPathOptionalComponentSyntax(self)!)
     case .keyPathPropertyComponent:
       return .keyPathPropertyComponent(KeyPathPropertyComponentSyntax(self)!)
     case .keyPathSubscriptComponent:
       return .keyPathSubscriptComponent(KeyPathSubscriptComponentSyntax(self)!)
-    case .keyPathFunctionComponent:
-        return .keyPathFunctionComponent(KeyPathFunctionComponentSyntax(self)!)
     case .labeledSpecializeEntry:
       return .labeledSpecializeEntry(LabeledSpecializeEntrySyntax(self)!)
     case .labeledStmt:

@@ -241,6 +241,8 @@ extension SyntaxKind {
       return "key path component"
     case .keyPathExpr:
       return "key path"
+    case .keyPathFunctionComponent:
+      return "key path function component"
     case .keyPathOptionalComponent:
       return "key path optional component"
     case .keyPathPropertyComponent:

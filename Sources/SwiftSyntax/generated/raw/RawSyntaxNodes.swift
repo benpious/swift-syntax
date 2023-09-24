@@ -12774,20 +12774,20 @@ public struct RawKeyPathComponentListSyntax: RawSyntaxNodeProtocol {
 @_spi(RawSyntax)
 public struct RawKeyPathComponentSyntax: RawSyntaxNodeProtocol {
   public enum Component: RawSyntaxNodeProtocol {
+    case `function`(RawKeyPathFunctionComponentSyntax)
     case `property`(RawKeyPathPropertyComponentSyntax)
     case `subscript`(RawKeyPathSubscriptComponentSyntax)
     case `optional`(RawKeyPathOptionalComponentSyntax)
-    case function(RawKeyPathFunctionComponentSyntax)
     
     public static func isKindOf(_ raw: RawSyntax) -> Bool {
-      return RawKeyPathPropertyComponentSyntax.isKindOf(raw) || RawKeyPathSubscriptComponentSyntax.isKindOf(raw) || RawKeyPathOptionalComponentSyntax.isKindOf(raw)
+      return RawKeyPathFunctionComponentSyntax.isKindOf(raw) || RawKeyPathPropertyComponentSyntax.isKindOf(raw) || RawKeyPathSubscriptComponentSyntax.isKindOf(raw) || RawKeyPathOptionalComponentSyntax.isKindOf(raw)
     }
     
     public var raw: RawSyntax {
       switch self {
-      case .property(let node):
-        return node.raw
       case .function(let node):
+        return node.raw
+      case .property(let node):
         return node.raw
       case .subscript(let node):
         return node.raw
@@ -12797,6 +12797,10 @@ public struct RawKeyPathComponentSyntax: RawSyntaxNodeProtocol {
     }
     
     public init?(_ other: some RawSyntaxNodeProtocol) {
+      if let node = RawKeyPathFunctionComponentSyntax(other) {
+        self = .function(node)
+        return
+      }
       if let node = RawKeyPathPropertyComponentSyntax(other) {
         self = .property(node)
         return
@@ -12964,6 +12968,88 @@ public struct RawKeyPathExprSyntax: RawExprSyntaxNodeProtocol {
 }
 
 @_spi(RawSyntax)
+public struct RawKeyPathFunctionComponentSyntax: RawSyntaxNodeProtocol {
+  @_spi(RawSyntax)
+  public var layoutView: RawSyntaxLayoutView {
+    return raw.layoutView!
+  }
+  
+  public static func isKindOf(_ raw: RawSyntax) -> Bool {
+    return raw.kind == .keyPathFunctionComponent
+  }
+  
+  public var raw: RawSyntax
+  
+  init(raw: RawSyntax) {
+    precondition(Self.isKindOf(raw))
+    self.raw = raw
+  }
+  
+  private init(unchecked raw: RawSyntax) {
+    self.raw = raw
+  }
+  
+  public init?(_ other: some RawSyntaxNodeProtocol) {
+    guard Self.isKindOf(other.raw) else {
+      return nil
+    }
+    self.init(unchecked: other.raw)
+  }
+  
+  public init(
+      _ unexpectedBeforeLeftParen: RawUnexpectedNodesSyntax? = nil, 
+      leftParen: RawTokenSyntax, 
+      _ unexpectedBetweenLeftParenAndArgumentList: RawUnexpectedNodesSyntax? = nil, 
+      argumentList: RawTupleExprElementListSyntax, 
+      _ unexpectedBetweenArgumentListAndRightParen: RawUnexpectedNodesSyntax? = nil, 
+      rightParen: RawTokenSyntax, 
+      _ unexpectedAfterRightParen: RawUnexpectedNodesSyntax? = nil, 
+      arena: __shared SyntaxArena
+    ) {
+    let raw = RawSyntax.makeLayout(
+      kind: .keyPathFunctionComponent, uninitializedCount: 7, arena: arena) { layout in
+      layout.initialize(repeating: nil)
+      layout[0] = unexpectedBeforeLeftParen?.raw
+      layout[1] = leftParen.raw
+      layout[2] = unexpectedBetweenLeftParenAndArgumentList?.raw
+      layout[3] = argumentList.raw
+      layout[4] = unexpectedBetweenArgumentListAndRightParen?.raw
+      layout[5] = rightParen.raw
+      layout[6] = unexpectedAfterRightParen?.raw
+    }
+    self.init(unchecked: raw)
+  }
+  
+  public var unexpectedBeforeLeftParen: RawUnexpectedNodesSyntax? {
+    layoutView.children[0].map(RawUnexpectedNodesSyntax.init(raw:))
+  }
+  
+  public var leftParen: RawTokenSyntax {
+    layoutView.children[1].map(RawTokenSyntax.init(raw:))!
+  }
+  
+  public var unexpectedBetweenLeftParenAndArgumentList: RawUnexpectedNodesSyntax? {
+    layoutView.children[2].map(RawUnexpectedNodesSyntax.init(raw:))
+  }
+  
+  public var argumentList: RawTupleExprElementListSyntax {
+    layoutView.children[3].map(RawTupleExprElementListSyntax.init(raw:))!
+  }
+  
+  public var unexpectedBetweenArgumentListAndRightParen: RawUnexpectedNodesSyntax? {
+    layoutView.children[4].map(RawUnexpectedNodesSyntax.init(raw:))
+  }
+  
+  public var rightParen: RawTokenSyntax {
+    layoutView.children[5].map(RawTokenSyntax.init(raw:))!
+  }
+  
+  public var unexpectedAfterRightParen: RawUnexpectedNodesSyntax? {
+    layoutView.children[6].map(RawUnexpectedNodesSyntax.init(raw:))
+  }
+}
+
+@_spi(RawSyntax)
 public struct RawKeyPathOptionalComponentSyntax: RawSyntaxNodeProtocol {
   @_spi(RawSyntax)
   public var layoutView: RawSyntaxLayoutView {
@@ -13101,53 +13187,6 @@ public struct RawKeyPathPropertyComponentSyntax: RawSyntaxNodeProtocol {
   public var unexpectedAfterGenericArgumentClause: RawUnexpectedNodesSyntax? {
     layoutView.children[6].map(RawUnexpectedNodesSyntax.init(raw:))
   }
-}
-
-@_spi(RawSyntax)
-public struct RawKeyPathFunctionComponentSyntax: RawSyntaxNodeProtocol {
-    
-    public init(
-        identifier: RawTokenSyntax,
-        argumentList: RawTupleExprSyntax,
-        arena: __shared SyntaxArena
-    ) {
-        self.raw = RawSyntax.makeLayout(
-            kind: .keyPathFunctionComponent,
-            uninitializedCount: 2,
-            arena: arena) { layout in
-                layout.initialize(repeating: nil)
-                layout[0] = identifier.raw
-                layout[1] = argumentList.raw
-            }
-    }
-    
-    @_spi(RawSyntax)
-    public var layoutView: RawSyntaxLayoutView {
-        return raw.layoutView!
-    }
-    
-    public static func isKindOf(_ raw: RawSyntax) -> Bool {
-        return raw.kind == .keyPathFunctionComponent
-    }
-    
-    public var raw: RawSyntax
-    
-    init(raw: RawSyntax) {
-        precondition(Self.isKindOf(raw))
-        self.raw = raw
-    }
-    
-    private init(unchecked raw: RawSyntax) {
-        self.raw = raw
-    }
-    
-    public init?(_ other: some RawSyntaxNodeProtocol) {
-        guard Self.isKindOf(other.raw) else {
-            return nil
-        }
-        self.init(unchecked: other.raw)
-    }
-    
 }
 
 @_spi(RawSyntax)

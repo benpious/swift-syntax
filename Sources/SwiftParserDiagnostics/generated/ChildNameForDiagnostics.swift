@@ -214,6 +214,8 @@ private func childNameForDiagnostics(_ keyPath: AnyKeyPath) -> String? {
     return "properties"
   case \KeyPathExprSyntax.root:
     return "root"
+  case \KeyPathFunctionComponentSyntax.argumentList:
+    return "arguments"
   case \KeyPathSubscriptComponentSyntax.argumentList:
     return "arguments"
   case \LabeledSpecializeEntrySyntax.label:

@@ -1110,6 +1110,13 @@ open class SyntaxRewriter {
     return ExprSyntax(visitChildren(node))
   }
   
+  /// Visit a ``KeyPathFunctionComponentSyntax``.
+  ///   - Parameter node: the node that is being visited
+  ///   - Returns: the rewritten node
+  open func visit(_ node: KeyPathFunctionComponentSyntax) -> KeyPathFunctionComponentSyntax {
+    return Syntax(visitChildren(node)).cast(KeyPathFunctionComponentSyntax.self)
+  }
+  
   /// Visit a ``KeyPathOptionalComponentSyntax``.
   ///   - Parameter node: the node that is being visited
   ///   - Returns: the rewritten node
@@ -4209,6 +4216,20 @@ open class SyntaxRewriter {
   }
   
   /// Implementation detail of visit(_:). Do not call directly.
+  private func visitImplKeyPathFunctionComponentSyntax(_ data: SyntaxData) -> Syntax {
+    let node = KeyPathFunctionComponentSyntax(data)
+    // Accessing _syntaxNode directly is faster than calling Syntax(node)
+    visitPre(node._syntaxNode)
+    defer {
+      visitPost(node._syntaxNode)
+    }
+    if let newNode = visitAny(node._syntaxNode) {
+      return newNode
+    }
+    return Syntax(visit(node))
+  }
+  
+  /// Implementation detail of visit(_:). Do not call directly.
   private func visitImplKeyPathOptionalComponentSyntax(_ data: SyntaxData) -> Syntax {
     let node = KeyPathOptionalComponentSyntax(data)
     // Accessing _syntaxNode directly is faster than calling Syntax(node)
@@ -4249,20 +4270,6 @@ open class SyntaxRewriter {
     }
     return Syntax(visit(node))
   }
-    
-    /// Implementation detail of visit(_:). Do not call directly.
-    private func visitImplKeyPathFunctionComponentSyntax(_ data: SyntaxData) -> Syntax {
-      let node = KeyPathFunctionComponentSyntax(data)
-      // Accessing _syntaxNode directly is faster than calling Syntax(node)
-      visitPre(node._syntaxNode)
-      defer {
-        visitPost(node._syntaxNode)
-      }
-      if let newNode = visitAny(node._syntaxNode) {
-        return newNode
-      }
-      return Syntax(visit(node))
-    }
   
   /// Implementation detail of visit(_:). Do not call directly.
   private func visitImplLabeledSpecializeEntrySyntax(_ data: SyntaxData) -> Syntax {
@@ -6282,14 +6289,14 @@ open class SyntaxRewriter {
       return visitImplKeyPathComponentSyntax
     case .keyPathExpr:
       return visitImplKeyPathExprSyntax
+    case .keyPathFunctionComponent:
+      return visitImplKeyPathFunctionComponentSyntax
     case .keyPathOptionalComponent:
       return visitImplKeyPathOptionalComponentSyntax
     case .keyPathPropertyComponent:
       return visitImplKeyPathPropertyComponentSyntax
     case .keyPathSubscriptComponent:
       return visitImplKeyPathSubscriptComponentSyntax
-    case .keyPathFunctionComponent:
-        return visitImplKeyPathFunctionComponentSyntax
     case .labeledSpecializeEntry:
       return visitImplLabeledSpecializeEntrySyntax
     case .labeledStmt:
@@ -6848,14 +6855,14 @@ open class SyntaxRewriter {
       return visitImplKeyPathComponentSyntax(data)
     case .keyPathExpr:
       return visitImplKeyPathExprSyntax(data)
+    case .keyPathFunctionComponent:
+      return visitImplKeyPathFunctionComponentSyntax(data)
     case .keyPathOptionalComponent:
       return visitImplKeyPathOptionalComponentSyntax(data)
     case .keyPathPropertyComponent:
       return visitImplKeyPathPropertyComponentSyntax(data)
     case .keyPathSubscriptComponent:
       return visitImplKeyPathSubscriptComponentSyntax(data)
-    case .keyPathFunctionComponent:
-        return visitImplKeyPathFunctionComponentSyntax(data)
     case .labeledSpecializeEntry:
       return visitImplLabeledSpecializeEntrySyntax(data)
     case .labeledStmt:

@@ -177,6 +177,7 @@ public enum SyntaxNodeKind: String, CaseIterable {
   case keyPathComponentList
   case keyPathComponent
   case keyPathExpr
+  case keyPathFunctionComponent
   case keyPathOptionalComponent
   case keyPathPropertyComponent
   case keyPathSubscriptComponent
