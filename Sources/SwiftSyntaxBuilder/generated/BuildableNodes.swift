@@ -936,7 +936,9 @@ extension KeyPathFunctionComponentSyntax {
   /// A convenience initializer that allows initializing syntax collections using result builders
   public init(
       leadingTrivia: Trivia? = nil, 
-      unexpectedBeforeLeftParen: UnexpectedNodesSyntax? = nil, 
+      unexpectedBeforeIdentifier: UnexpectedNodesSyntax? = nil, 
+      identifier: TokenSyntax, 
+      unexpectedBetweenIdentifierAndLeftParen: UnexpectedNodesSyntax? = nil, 
       leftParen: TokenSyntax = .leftParenToken(), 
       unexpectedBetweenLeftParenAndArgumentList: UnexpectedNodesSyntax? = nil, 
       unexpectedBetweenArgumentListAndRightParen: UnexpectedNodesSyntax? = nil, 
@@ -947,7 +949,9 @@ extension KeyPathFunctionComponentSyntax {
     ) rethrows {
     try self.init(
         leadingTrivia: leadingTrivia, 
-        unexpectedBeforeLeftParen, 
+        unexpectedBeforeIdentifier, 
+        identifier: identifier, 
+        unexpectedBetweenIdentifierAndLeftParen, 
         leftParen: leftParen, 
         unexpectedBetweenLeftParenAndArgumentList, 
         argumentList: argumentListBuilder(), 

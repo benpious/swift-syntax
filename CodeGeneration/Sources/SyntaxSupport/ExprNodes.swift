@@ -1065,6 +1065,10 @@ public let EXPR_NODES: [Node] = [
     nameForDiagnostics: "key path function component",
     children: [
       Child(
+        name: "Identifier",
+        kind: .token(choices: [.token(tokenKind: "IdentifierToken")])
+      ),
+      Child(
         name: "LeftParen",
         kind: .token(choices: [.token(tokenKind: "LeftParenToken")])
       ),

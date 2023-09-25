@@ -11299,7 +11299,9 @@ public struct KeyPathFunctionComponentSyntax: SyntaxProtocol, SyntaxHashable {
   
   public init(
       leadingTrivia: Trivia? = nil,
-      _ unexpectedBeforeLeftParen: UnexpectedNodesSyntax? = nil,
+      _ unexpectedBeforeIdentifier: UnexpectedNodesSyntax? = nil,
+      identifier: TokenSyntax,
+      _ unexpectedBetweenIdentifierAndLeftParen: UnexpectedNodesSyntax? = nil,
       leftParen: TokenSyntax = .leftParenToken(),
       _ unexpectedBetweenLeftParenAndArgumentList: UnexpectedNodesSyntax? = nil,
       argumentList: TupleExprElementListSyntax,
@@ -11312,7 +11314,9 @@ public struct KeyPathFunctionComponentSyntax: SyntaxProtocol, SyntaxHashable {
     // Extend the lifetime of all parameters so their arenas don't get destroyed
     // before they can be added as children of the new arena.
     let data: SyntaxData = withExtendedLifetime((SyntaxArena(), (
-            unexpectedBeforeLeftParen, 
+            unexpectedBeforeIdentifier, 
+            identifier, 
+            unexpectedBetweenIdentifierAndLeftParen, 
             leftParen, 
             unexpectedBetweenLeftParenAndArgumentList, 
             argumentList, 
@@ -11321,7 +11325,9 @@ public struct KeyPathFunctionComponentSyntax: SyntaxProtocol, SyntaxHashable {
             unexpectedAfterRightParen
           ))) {(arena, _) in
       let layout: [RawSyntax?] = [
-          unexpectedBeforeLeftParen?.raw, 
+          unexpectedBeforeIdentifier?.raw, 
+          identifier.raw, 
+          unexpectedBetweenIdentifierAndLeftParen?.raw, 
           leftParen.raw, 
           unexpectedBetweenLeftParenAndArgumentList?.raw, 
           argumentList.raw, 
@@ -11342,7 +11348,7 @@ public struct KeyPathFunctionComponentSyntax: SyntaxProtocol, SyntaxHashable {
     self.init(data)
   }
   
-  public var unexpectedBeforeLeftParen: UnexpectedNodesSyntax? {
+  public var unexpectedBeforeIdentifier: UnexpectedNodesSyntax? {
     get {
       return data.child(at: 0, parent: Syntax(self)).map(UnexpectedNodesSyntax.init)
     }
@@ -11351,7 +11357,7 @@ public struct KeyPathFunctionComponentSyntax: SyntaxProtocol, SyntaxHashable {
     }
   }
   
-  public var leftParen: TokenSyntax {
+  public var identifier: TokenSyntax {
     get {
       return TokenSyntax(data.child(at: 1, parent: Syntax(self))!)
     }
@@ -11360,7 +11366,7 @@ public struct KeyPathFunctionComponentSyntax: SyntaxProtocol, SyntaxHashable {
     }
   }
   
-  public var unexpectedBetweenLeftParenAndArgumentList: UnexpectedNodesSyntax? {
+  public var unexpectedBetweenIdentifierAndLeftParen: UnexpectedNodesSyntax? {
     get {
       return data.child(at: 2, parent: Syntax(self)).map(UnexpectedNodesSyntax.init)
     }
@@ -11369,12 +11375,30 @@ public struct KeyPathFunctionComponentSyntax: SyntaxProtocol, SyntaxHashable {
     }
   }
   
-  public var argumentList: TupleExprElementListSyntax {
+  public var leftParen: TokenSyntax {
     get {
-      return TupleExprElementListSyntax(data.child(at: 3, parent: Syntax(self))!)
+      return TokenSyntax(data.child(at: 3, parent: Syntax(self))!)
     }
     set(value) {
       self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 3, with: value.raw, arena: SyntaxArena()))
+    }
+  }
+  
+  public var unexpectedBetweenLeftParenAndArgumentList: UnexpectedNodesSyntax? {
+    get {
+      return data.child(at: 4, parent: Syntax(self)).map(UnexpectedNodesSyntax.init)
+    }
+    set(value) {
+      self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 4, with: value?.raw, arena: SyntaxArena()))
+    }
+  }
+  
+  public var argumentList: TupleExprElementListSyntax {
+    get {
+      return TupleExprElementListSyntax(data.child(at: 5, parent: Syntax(self))!)
+    }
+    set(value) {
+      self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 5, with: value.raw, arena: SyntaxArena()))
     }
   }
   
@@ -11387,35 +11411,17 @@ public struct KeyPathFunctionComponentSyntax: SyntaxProtocol, SyntaxHashable {
   public func addArgument(_ element: TupleExprElementSyntax) -> KeyPathFunctionComponentSyntax {
     var collection: RawSyntax
     let arena = SyntaxArena()
-    if let col = raw.layoutView!.children[3] {
+    if let col = raw.layoutView!.children[5] {
       collection = col.layoutView!.appending(element.raw, arena: arena)
     } else {
       collection = RawSyntax.makeLayout(kind: SyntaxKind.tupleExprElementList,
                                         from: [element.raw], arena: arena)
     }
-    let newData = data.replacingChild(at: 3, with: collection, arena: arena)
+    let newData = data.replacingChild(at: 5, with: collection, arena: arena)
     return KeyPathFunctionComponentSyntax(newData)
   }
   
   public var unexpectedBetweenArgumentListAndRightParen: UnexpectedNodesSyntax? {
-    get {
-      return data.child(at: 4, parent: Syntax(self)).map(UnexpectedNodesSyntax.init)
-    }
-    set(value) {
-      self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 4, with: value?.raw, arena: SyntaxArena()))
-    }
-  }
-  
-  public var rightParen: TokenSyntax {
-    get {
-      return TokenSyntax(data.child(at: 5, parent: Syntax(self))!)
-    }
-    set(value) {
-      self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 5, with: value.raw, arena: SyntaxArena()))
-    }
-  }
-  
-  public var unexpectedAfterRightParen: UnexpectedNodesSyntax? {
     get {
       return data.child(at: 6, parent: Syntax(self)).map(UnexpectedNodesSyntax.init)
     }
@@ -11424,9 +11430,29 @@ public struct KeyPathFunctionComponentSyntax: SyntaxProtocol, SyntaxHashable {
     }
   }
   
+  public var rightParen: TokenSyntax {
+    get {
+      return TokenSyntax(data.child(at: 7, parent: Syntax(self))!)
+    }
+    set(value) {
+      self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 7, with: value.raw, arena: SyntaxArena()))
+    }
+  }
+  
+  public var unexpectedAfterRightParen: UnexpectedNodesSyntax? {
+    get {
+      return data.child(at: 8, parent: Syntax(self)).map(UnexpectedNodesSyntax.init)
+    }
+    set(value) {
+      self = KeyPathFunctionComponentSyntax(data.replacingChild(at: 8, with: value?.raw, arena: SyntaxArena()))
+    }
+  }
+  
   public static var structure: SyntaxNodeStructure {
     return .layout([
-          \Self.unexpectedBeforeLeftParen, 
+          \Self.unexpectedBeforeIdentifier, 
+          \Self.identifier, 
+          \Self.unexpectedBetweenIdentifierAndLeftParen, 
           \Self.leftParen, 
           \Self.unexpectedBetweenLeftParenAndArgumentList, 
           \Self.argumentList, 

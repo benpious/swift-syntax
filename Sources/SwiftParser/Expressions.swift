@@ -1126,7 +1126,9 @@ extension Parser {
                       component: .function(
                           RawKeyPathFunctionComponentSyntax(
                             identifier: name,
-                            argumentList: functionCall,
+                            leftParen: functionCall.leftParen,
+                            argumentList: functionCall.elements,
+                            rightParen: functionCall.rightParen,
                             arena: arena
                           )
                       ),
